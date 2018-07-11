@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BasicRallyGrid</title>
+
+    <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                Ext.define('CustomApp', {
+    extend: 'Rally.app.App',
+    componentCls: 'app',
+    launch: function() {
+        console.log('Our First App woot!');
+        this._loadData();
+    },
+
+    _loadData: function() {
+
+        let alucardStore = Ext.create('Rally.data.wsapi.Store', {
+            model: 'User Story',
+            autoLoad: true,
+            listeners: {
+                load: function(alucardStore, alucardData, success) {
+                    console.log('got data!', alucardStore, alucardData, success);
+                    this._loadGrid(alucardStore);
+                },
+                scope: this
+            },
+            fetch: ['FormattedID', 'Name', 'ScheduleState']
+        });
+    },
+
+    _loadGrid: function(alucardStore) {
+        let alucardGrid = Ext.create('Rally.ui.grid.Grid', {
+            store: alucardStore,
+            columnCfgs: [
+                'FormattedID', 'Name', 'ScheduleState'
+            ]
+        });
+
+        this.add(alucardGrid);
+
+    }
+
+});
+
+
+            Rally.launchApp('CustomApp', {
+                name:"BasicRallyGrid",
+                parentRepos:"",
+                version:"0.1.1"
+            });
+
+        });
+    </script>
+
+
+
+    <style type="text/css">
+        .app {
+  /* Add app styles here */
+}
+
+    </style>
+</head>
+<body>
+</body>
+</html>
