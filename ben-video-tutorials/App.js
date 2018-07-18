@@ -28,11 +28,12 @@ Ext.define('CustomApp', {
         var projectList = Ext.create('Ext.data.Store', {
             fields: ['name', 'value'],
             data: [
-                {"name": "Global", "value": "global"},
-                {"name": "Shop", "value": "shop"},
-                {"name": "Account Management", "value": "accountManagement"},
-                {"name": "PUB", "value": "pub"},
-                {"name": "TechOps", "value": "techOps"},
+                {"name": "All", "value": "208447136196"},
+                {"name": "Global", "value": "208449426736"},
+                {"name": "Shop", "value": "208450167952"},
+                {"name": "Account Management", "value": "208449406576"},
+                {"name": "PUB", "value": "208449434348"},
+                {"name": "TechOps", "value": "222502039964"},
             ]
         });
 
@@ -63,11 +64,11 @@ Ext.define('CustomApp', {
         console.log("selected Value: ", selectedProject);
 
         //Sets filters for data that limit to user selection
-        let myFilters = this._getFilters(selectedProject);
+        //let userSelection = this._getFilters(selectedProject);
 
         //If the store exists, load new data
         if (this.alucardStore) {
-            this.alucardStore.setFilter(myFilters);
+            this.alucardStore.context.project = this._getProjectContext(selectedProject);
             this.alucardStore.load();
         }
         //Else Create a fresh grid/store of data
@@ -75,7 +76,12 @@ Ext.define('CustomApp', {
             this.alucardStore = Ext.create('Rally.data.wsapi.Store', {
                 model: 'Defect',
                 autoLoad: true,
-                filters: myFilters,
+                context: {
+                    project: this._getProjectContext(selectedProject),
+                    projectScopeDown: true,
+                    projectScopeUp: false
+                },
+                //filters: myFilters,
                 listeners: {
                     load: function (alucardStore, data, success, filters) {
                         console.log('got data!', alucardStore, data, success, 'Filters!: ', filters);
@@ -102,32 +108,18 @@ Ext.define('CustomApp', {
         this.add(this.alucardGrid);
     },
 
-    _getFilters: function (userSelection) {
+    _getProjectContext: function (userSelection) {
+        let myProject = '/project/' + userSelection;
+        let defaultProject = '/project/208447136196';
 
-        let myFilter;
-
-        switch (userSelection) {
-            case 'pub': myFilter= this._filters.pub.or(this._filters.pubCod).or(this._filters.pubMonkeys).or(this._filters.pubPeppers);
-                break;
-            case 'shop': myFilter= this._filters.shop.or(this._filters.shopCod).or(this._filters.shopCore);
-                break;
-            case 'techOps': myFilter= this._filters.techOps.or(this._filters.techCD).or(this._filters.techcloudSecOps).or(this._filters.techAutomation).or(this._filters.techprodSupport);
-                break;
-            case 'global': myFilter= this._filters.global.or(this._filters.globalAustin).or(this._filters.globalCOD).or(this._filters.globalCore).or(this._filters.globalGlobe).or(this._filters.globalRockers).or(this._filters.globalSpartans);
-                break;
-            case 'accountManagement': myFilter = this._filters.accMngnt.or(this._filters.accMngnt200Ok).or(this._filters.accMngntDothraki).or(this._filters.accMngntRR);
-                break;
+        console.log('My Project: ', myProject);
+        if (!userSelection)
+        {
+            myProject = defaultProject;
         }
 
-        return myFilter;
-
-        //Sets filters to use both user selections
-        return pub.or(pubCod).or(pubMonkeys).or(pubPeppers);
+        return myProject;
     },
-
-    //Uses selected items from combobox to populate grid with data
-
-
 
     _filters: {
         //SHOP ************************************************
