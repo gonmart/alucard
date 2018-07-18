@@ -5,33 +5,28 @@ Ext.define('CustomApp', {
     myStore: undefined,
     myGrid: undefined,
     context: {projectScopeDown: true},
-
-    items: [
-        {
-            xtype: 'container',
+    //App starts here
+    launch: function () {
+        let me = this;
+        //Creates horizontal layout dropdown menus
+        let pulldownContainer = Ext.create('Ext.container.Container', {
             itemId: 'pulldown-container',
             layout: {
                 type: 'hbox',
                 align: 'stretch'
             }
-        }
-    ],
+        });
 
-    //App starts here
-    launch: function () {
-
-        let me = this;
-
-        //Creates horizontal layout dropdown menus
-        console.log('loading app...');
+        me.add(pulldownContainer);
         me._loadProjects();
+        me._loadFields();
+        me._loadData();
     },
 
 
     _loadProjects: function () {
         let me = this;
         // creates data store containing the list of projects & Ids
-        console.log('called loadProjects');
         let projectList = Ext.create('Ext.data.Store', {
             fields: ['name', 'value'],
             data: [
@@ -53,16 +48,15 @@ Ext.define('CustomApp', {
             queryMode: 'local',
             displayField: 'name',
             valueField: 'value',
+            value: '208447136196',
             width: 300,
-            renderTo: Ext.getBody(),
             listeners: {
-                ready: me._loadFields,
+                ready: me._loadData,
                 select: me._loadData,
                 scope: me
             }
         });
-        this.down('#pulldown-container').add(projectComboBox);
-        console.log('added project combobox');
+        me.down('#pulldown-container').add(projectComboBox);
     },
 
     _loadFields: function () {
@@ -91,17 +85,15 @@ Ext.define('CustomApp', {
             width: 300,
             renderTo: Ext.getBody(),
             listeners: {
-                ready: me._loadData(),
                 select: me._loadProperties,
                 scope: me
             }
         });
-        this.down('#pulldown-container').add(fieldComboBox);
+        me.add(fieldComboBox);
     },
 
     _loadProperties: function () {
         let me = this;
-        console.log('called loadProperties');
         let selectedField = this.down('#field-combobox').getValue();
 
         let propertyCombobox = Ext.create('Rally.ui.combobox.FieldValueComboBox', {
@@ -118,70 +110,89 @@ Ext.define('CustomApp', {
             }
         });
 
-        this.down('#pulldown-container').add(propertyCombobox);
+        me.down('#pulldown-container').add(propertyCombobox);
     },
 
-    /*_loadSelections() {
-        let selectedField = this.down('#field-combobox').getValue();
-        let selectedProperty = this.down('#property-combobox').getValue();
-        let ready;
-        if(this.down('#field-combobox').getValue() && this.down('#property-combobox').getValue()) { ready = true}
-        let propertyFilter = this._getFilters(selectedField, selectedProperty);
-        return {
-            ready:ready,
-            filter: propertyFilter
-        }
-    },*/
-    _loadData: function () {
-        let selectedProject = this.down('#project-combobox').getValue();
 
+    _loadData: function () {
+        let me = this;
+        console.log('Called LoadData');
+        let selectedProject;
+        if (me.down('#project-combobox').getValue()){
+            selectedProject = me.down('#project-combobox').getValue();
+        }
+        else selectedProject = 'All';
         //Sets filters for data that limit to user selection
         //If the store exists, load new data
-        if (this.alucardStore) {
-            this.alucardStore.context.project = this._getProjectContext(selectedProject);
-            /*if (this._loadSelections.ready) {
-                this.alucardStore.setFilter(this._loadSelections.filter);
-            }*/
-            /*else {
-                console.log('filter has not been set');
-            }*/
+        if (me.alucardStore) {
+            console.log('store already exists');
+            console.log('is ready', me._isReady());
+            me.alucardStore.context.project = me._getProjectContext(selectedProject);
+            if(me._isReady()) {
+                console.log('selections are ready');
+                me.alucardStore.setFilter(me._loadSelections());
+            }
+
             this.alucardStore.load();
-        }
+            }
+
+
         //Else Create a fresh grid/store of data
         else {
-            this.alucardStore = Ext.create('Rally.data.wsapi.Store', {
+            me.alucardStore = Ext.create('Rally.data.wsapi.Store', {
                 model: 'Defect',
                 autoLoad: true,
                 context: {
-                    project: this._getProjectContext(selectedProject),
+                    project: me._getProjectContext(selectedProject),
                     projectScopeDown: true,
                     projectScopeUp: false
                 },
                 listeners: {
-                    load: function (alucardStore, data, success, filters) {
-                        console.log('got data!', alucardStore, data, success, 'Filters!: ', filters);
+                    load: function (alucardStore) {
                         if (!this.alucardGrid) {
-                            this._createGrid(alucardStore);
+                            me._createGrid(alucardStore);
                         }
                     },
-                    scope: this
+                    scope: me
                 },
                 fetch: ['FormattedID', 'Name', 'Severity', 'Iteration', 'Project']
             });
         }
     },
 
-    /*_getFilters: function(field, property) {
+    _isReady() {
+        let me = this;
+        let ready =false;
+        if(this.down('#field-combobox').getValue() && me.down('#property-combobox').getValue()) {
+            ready = true;
+        }
+        return ready;
+    },
+
+    _loadSelections() {
+        let me = this;
+        let selectedField;
+        let selectedProperty;
+        if(me._isReady()) {
+            selectedField = this.down('#field-combobox').getValue();
+            selectedProperty = this.down('#property-combobox').getValue();
+        }
+        let propertyFilter = me._getFilters(selectedField, selectedProperty);
+        return propertyFilter
+
+    },
+
+    _getFilters: function(field, property) {
         myfilter = Ext.create('Rally.data.wsapi.Filter', {
             property: field,
             operator: '=',
             value: property
         });
-    },*/
+        return myfilter;
+    },
 
     //Creates a new grid with specified columns
     _createGrid: function (alucardStore) {
-        console.log('creating Grid');
         this.alucardGrid = Ext.create('Rally.ui.grid.Grid', {
             store: alucardStore,
             columnCfgs: [
@@ -194,8 +205,6 @@ Ext.define('CustomApp', {
     _getProjectContext: function (userSelection) {
         let myProject = '/project/' + userSelection;
         let defaultProject = '/project/208447136196';
-
-        console.log('My Project: ', myProject);
         if (!userSelection) {
             myProject = defaultProject;
         }
