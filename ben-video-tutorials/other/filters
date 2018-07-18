@@ -1,0 +1,135 @@
+/*_filters: {
+    //SHOP ************************************************
+    shop: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "(c) Shop (OneSite)"
+    }),
+    shopCod: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "Shop_CoD"
+    }),
+    shopCore: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "Shope_Core"
+    }),
+    //!*****************************************************
+
+    //Pub *************************************************
+    pub: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "(c) PUB (OneSite)"
+    }),
+    pubCod: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "PUB_CoD"
+    }),
+    pubMonkeys: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "PUB_Frozen Monkeys"
+    }),
+    pubPeppers: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "Chilana Peppers"
+    }),
+    avengers: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "PUB_Avengers"
+    }),
+    //!*****************************************************
+
+
+    //TechOps *********************************************
+    techOps: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "(c) TechOps (OneSite)"
+    }),
+    techcloudSecOps: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "TO_CloudSecOps"
+    }),
+    techCD: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "TO_Continuous Delivery"
+    }),
+    techAutomation: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "TO_Automation"
+    }),
+    techprodSupport: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "TO_Prod Support"
+    }),
+    //Global ***********************************************
+    global: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "(c) Global (OneSite)"
+    }),
+    globalCore: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "GL_Core"
+    }),
+    globalGlobe: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "GL_Globetrotters"
+    }),
+    globalAustin: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "GL_RZF-Austin"
+    }),
+    globalRockers: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "GL_Rockers"
+    }),
+    globalSpartans: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "GL_Spartans"
+    }),
+    globalCOD: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "GL_CoD"
+    }),
+    //!*****************************************************
+
+    //Account Management***********************************
+    accMngnt: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "(c) Account Management (OneSite)"
+    }),
+    accMngnt200Ok: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "ACC_200_OK_SUCCESS"
+    }),
+    accMngntDothraki: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "ACC_Dothraki"
+    }),
+    accMngntRR: Ext.create('Rally.data.wsapi.Filter', {
+        property: 'Project.Name',
+        operator: '=',
+        value: "ACC_RoadRunners"
+    }),
+}
+});*/
