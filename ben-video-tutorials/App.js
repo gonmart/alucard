@@ -2,8 +2,11 @@ Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
 
-    myStore: undefined,
-    myGrid: undefined,
+    alucardStore: undefined,
+    countStore: undefined,
+    alucardGrid: undefined,
+    alucardChart: undefined,
+    chart: undefined,
     context: {projectScopeDown: true},
 
     //************************************************************************************
@@ -140,7 +143,9 @@ Ext.define('CustomApp', {
         //Else Create a fresh grid/store of data
         else {
             me.alucardStore = Ext.create('Rally.data.wsapi.Store', {
+                itemId: 'alucard-store',
                 model: 'Defect',
+                limit: 'Infinity',
                 autoLoad: true,
                 context: {
                     project: me._getProjectContext(selectedProject),
@@ -148,10 +153,12 @@ Ext.define('CustomApp', {
                     projectScopeUp: false
                 },
                 listeners: {
-                    load: function (alucardStore) {
-                        if (!this.alucardGrid) {
-                            me._createGrid(alucardStore);
+                    load: function () {
+                        if(!me.countStore) {
+                            me._getChart(me.alucardStore);
                         }
+                        console.log(me.countStore);
+                        me.countStore.getAt(0).set('count', me.alucardStore.count());
                     },
                     scope: me
                 },
@@ -160,11 +167,61 @@ Ext.define('CustomApp', {
         }
     },
 
+    //**********************************************************************************\\
+    //*     Creates a basic chart and loads the count of defects based on store        *\\
+    //**********************************************************************************\\
+    _getChart(store) {
+        let me = this;
+        Ext.define('WeatherPoint', {
+            extend: 'Ext.data.Model',
+            fields: ['count']
+        });
+
+        me.countStore = Ext.create('Ext.data.Store', {
+            model: 'WeatherPoint',
+            data: [
+                {
+                    count: store.count(),
+                }
+            ]
+        });
+        console.log(me.countStore.count());
+
+        me.chart = Ext.create('Ext.chart.Chart', {
+            renderTo: Ext.getBody(),
+            width: 400,
+            height: 300,
+            store: me.countStore,
+            axes: [
+                {
+                    title: 'Defect Count',
+                    type: 'gauge',
+                    position: 'gauge',
+                    minimum: 0,
+                    maximum: 2000,
+                    steps: 10,
+                    margin: 10,
+                },
+            ],
+            series:
+                [
+                    {
+                        type: 'gauge',
+                        needle: true,
+                        donut: 90,
+                        field: 'count',
+                        colorSet: ['#F40f99', '#000']
+                    }
+                ],
+            theme: 'Green',
+        });
+
+        me.add(me.chart);
+    },
 
 //******************************************************************************************\\
 //*                                    WORKER FUNCTIONS                                    *\\
 //******************************************************************************************\\
-
 
 
     //**********************************************************************************\\
@@ -196,15 +253,15 @@ Ext.define('CustomApp', {
 //*                    Creates a new grid with specified columns                   *\\
 //**********************************************************************************\\
     _createGrid: function (alucardStore) {
-        this.alucardGrid = Ext.create('Rally.ui.grid.Grid', {
+        let me = this;
+        me.alucardGrid = Ext.create('Rally.ui.grid.Grid', {
             store: alucardStore,
             columnCfgs: [
                 'FormattedID', 'Name', 'Severity', 'Iteration', 'Project'
             ]
         });
-        this.add(this.alucardGrid);
-    }
-    ,
+        me.add(me.alucardGrid);
+    },
 
 //**********************************************************************************\\
 //*       sets project context(scope) and provides default if none selected        *\\
@@ -221,7 +278,8 @@ Ext.define('CustomApp', {
         return myProject;
     }
 
-});
+})
+;
 
 
 
