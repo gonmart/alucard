@@ -15,10 +15,12 @@ Ext.define('CustomApp', {
     countStore: undefined,
     pieChart: undefined,
     context: {projectScopeDown: true},
+
     launch: function () {
         let me = this;
         me._loadStores();
     },
+
     _loadStores: function () {
         let me = this;
         let myFilter = Ext.create('Rally.data.wsapi.Filter', {
@@ -128,6 +130,7 @@ Ext.define('CustomApp', {
         });
         me.globalStore.load();
     },
+    
     _createCountStore: function() {
         let me= this;
         Ext.define('DefectsCounter', {
