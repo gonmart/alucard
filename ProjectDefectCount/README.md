@@ -2,7 +2,9 @@ BasicRallyGrid
 =========================
 
 ## Overview
-christina was here
+This pie chart displays all unclosed Defects sorted by OneSite Capability
+
+(Shop || Account Management || PUB || TechOps || Global)
 
 ## License
 
