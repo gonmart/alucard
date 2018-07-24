@@ -1,4 +1,4 @@
-Random App Name27104
+Random App Name8822
 =========================
 
 ## Overview
@@ -6,7 +6,7 @@ Random App Name27104
 
 ## License
 
-Random App Name27104 is released under the MIT license.  See the file [LICENSE](./LICENSE) for the full text.
+Random App Name8822 is released under the MIT license.  See the file [LICENSE](./LICENSE) for the full text.
 
 ##Documentation for SDK
 
