@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>BasicRallyGrid</title>
+
+    <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                Ext.define("CustomApp",{extend:"Rally.app.App",componentCls:"app",myStore:void 0,myGrid:void 0,context:{projectScopeDown:!0},launch:function(){let e=Ext.create("Ext.container.Container",{itemId:"pulldown-container",layout:{type:"hbox",align:"stretch"}});this.add(e),this._loadProjects(),this._loadFields(),this._loadData()},_loadProjects:function(){let e=Ext.create("Ext.data.Store",{fields:["name","value"],data:[{name:"All",value:"208447136196"},{name:"Global",value:"208449426736"},{name:"Shop",value:"208450167952"},{name:"Account Management",value:"208449406576"},{name:"PUB",value:"208449434348"},{name:"TechOps",value:"222502039964"}]}),t=Ext.create("Ext.form.ComboBox",{itemId:"project-combobox",fieldLabel:"Defects by Capability",labelAlign:"right",store:e,queryMode:"local",displayField:"name",valueField:"value",value:"208447136196",width:300,listeners:{ready:this._loadData,select:this._loadData,scope:this}});this.down("#pulldown-container").add(t)},_loadFields:function(){let e=Ext.create("Ext.data.Store",{fields:["name","value"],data:[{name:"State",value:"State"},{name:"Severity",value:"Severity"},{name:"Priority",value:"Priority"},{name:"Environment",value:"Environment"},{name:"Trend",value:"Trend"}]}),t=Ext.create("Ext.form.ComboBox",{itemId:"field-combobox",fieldLabel:"Defect Fields",labelAlign:"right",store:e,queryMode:"local",displayField:"name",valueField:"value",width:300,renderTo:Ext.getBody(),listeners:{select:this._loadProperties,scope:this}});this.add(t)},_loadProperties:function(){let e=this.down("#field-combobox").getValue(),t=Ext.create("Rally.ui.combobox.FieldValueComboBox",{itemId:"property-combobox",model:"Defect",field:e,fieldLabel:"Defects by Property",labelAlign:"right",width:300,renderTo:Ext.getBody(),listeners:{select:this._loadData,scope:this}});this.down("#pulldown-container").add(t)},_loadData:function(){let e,t=this;console.log("Called LoadData"),e=t.down("#project-combobox").getValue()?t.down("#project-combobox").getValue():"All",t.alucardStore?(console.log("store already exists"),console.log("is ready",t._isReady()),t.alucardStore.context.project=t._getProjectContext(e),t._isReady()&&(console.log("selections are ready"),t.alucardStore.setFilter(t._loadSelections())),this.alucardStore.load()):t.alucardStore=Ext.create("Rally.data.wsapi.Store",{model:"Defect",autoLoad:!0,context:{project:t._getProjectContext(e),projectScopeDown:!0,projectScopeUp:!1},listeners:{load:function(e){this.alucardGrid||t._createGrid(e)},scope:t},fetch:["FormattedID","Name","Severity","Iteration","Project"]})},_isReady(){let e=!1;return this.down("#field-combobox").getValue()&&this.down("#property-combobox").getValue()&&(e=!0),e},_loadSelections(){let e,t;return this._isReady()&&(e=this.down("#field-combobox").getValue(),t=this.down("#property-combobox").getValue()),this._getFilters(e,t)},_getFilters:function(e,t){return myfilter=Ext.create("Rally.data.wsapi.Filter",{property:e,operator:"=",value:t}),myfilter},_createGrid:function(e){this.alucardGrid=Ext.create("Rally.ui.grid.Grid",{store:e,columnCfgs:["FormattedID","Name","Severity","Iteration","Project"]}),this.add(this.alucardGrid)},_getProjectContext:function(e){let t="/project/"+e;return e||(t="/project/208447136196"),t}});
+
+            Rally.launchApp('CustomApp', {
+                name:"BasicRallyGrid",
+                parentRepos:"",
+                version:"0.1.1"
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        
+    </style>
+</head>
+<body>
+</body>
+</html>
