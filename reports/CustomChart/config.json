@@ -1,0 +1,21 @@
+{
+    "name": "Custom Chart",
+    "className": "CustomChartApp",
+    "server": "https://rally1.rallydev.com",
+    "sdk": "2.1",
+    "javascript": [
+        "Utils.js",
+        "Calculator.js",
+        "bar/Calculator.js",
+        "bar/Chart.js",
+        "column/Calculator.js",
+        "column/Chart.js",
+        "pie/Calculator.js",
+        "pie/Chart.js",
+        "Settings.js",
+        "CustomChartApp.js"
+    ],
+    "css": [
+        "app.css"
+    ]
+}
