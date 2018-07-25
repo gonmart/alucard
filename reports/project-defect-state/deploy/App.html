@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Configurable Defect Chart</title>
+
+    <script type="text/javascript" src="/apps/2.1/sdk.js"></script>
+
+    <script type="text/javascript">
+        Rally.onReady(function () {
+                Ext.define("Calculator",{config:{calculationType:void 0,field:void 0,stackField:void 0,stackValues:void 0,bucketBy:void 0},constructor:function(t){this.initConfig(t)},prepareChartData:function(t){var e,i=this._groupData(t),a=_.keys(i);if(this.stackField){var r,n=t.model.getField(this.stackField);if(this.stackValues)r=_.map(this.stackValues,function(t){return this._getDisplayValue(n,t)},this);else{var s=_.invoke(t.getRange(),"get",this.stackField);"Iteration"!==this.stackField&&"Release"!==this.stackField||(s=_.sortBy(s,function(t){var e=t&&(t.StartDate||t.ReleaseStartDate||null);return new Date(e)})),r=_.unique(_.map(s,function(t){return this._getDisplayValue(n,t)},this))}var u={};return _.each(a,function(t){var e=i[t],a=_.groupBy(e,function(t){return this._getDisplayValueForField(t,this.stackField)},this);_.each(r,function(t){u[t]=u[t]||[];var e=a[t];if("count"===this.calculationType)u[t].push(e&&e.length||0);else{var i=_.reduce(e,function(t,e){var i=this._getValueFieldForCalculationType();return t+e.get(i)},0,this);u[t].push(i)}},this)},this),{categories:a,series:_.map(r,function(t){return{name:t,type:this.seriesType,data:u[t]}},this)}}return e="count"===this.calculationType?_.map(i,function(t,e){return[e,t.length]}):_.map(i,function(t,e){return[e,_.reduce(t,function(t,e){var i=this._getValueFieldForCalculationType();return t+e.get(i)},0,this)]},this),{categories:a,series:[{name:this.field,type:this.seriesType,data:e}]}},_groupData:function(t){var e=t.model.getField(this.field),i=e.getType(),a={};if("collection"===i)return _.each(t.getRange(),function(t){var e=t.get(this.field)._tagsNameArray;_.isEmpty(e)?(a.None=a.None||[],a.None.push(t)):_.each(e,function(e){a[e.Name]=a[e.Name]||[],a[e.Name].push(t)})},this),a;if(a=_.groupBy(t.getRange(),function(t){return this._getDisplayValueForField(t,this.field)},this),"date"===i){var r=_.sortBy(_.compact(_.map(t.getRange(),function(t){return t.get(this.field)},this))),n=this._getDateRange(r[0],r[r.length-1]),s={};a["-- No Entry --"]&&(s["-- No Entry --"]=a["-- No Entry --"]),a=_.reduce(n,function(t,i){var r=this._getDisplayValue(e,moment(i).toDate());return t[r]=a[r]||[],t},s,this)}return a},_getDateRange:function(t,e){var i=t,a=[],r="d";for("week"===this.bucketBy?r="w":"month"===this.bucketBy?r="M":"quarter"===this.bucketBy?r="Q":"year"===this.bucketBy&&(r="y");i<=e;)a.push(i),i=moment(i).add(1,r).toDate();return a.push(e),a},_getDisplayValueForField:function(t,e){var i=t.getField(e),a=t.get(e);return this._getDisplayValue(i,a)},_getDisplayValue:function(t,e){if(!_.isDate(e)){if(_.isObject(e))return e._refObjectName;if(Ext.isEmpty(e)){var i=t.getType();return"User"===t.attributeDefinition.SchemaType?"-- No Owner --":"rating"===i||"object"===i?"None":"-- No Entry --"}return e}return this.bucketBy&&"day"!==this.bucketBy?"week"===this.bucketBy?Rally.util.DateTime.formatWithDefault(moment(e).startOf("week").toDate()):"month"===this.bucketBy?moment(e).startOf("month").format("MMM 'YY"):"quarter"===this.bucketBy?moment(e).startOf("quarter").format("YYYY [Q]Q"):"year"===this.bucketBy?moment(e).startOf("year").format("YYYY"):void 0:Rally.util.DateTime.formatWithDefault(e)},_getValueFieldForCalculationType:function(){return Utils.getFieldForAggregationType(this.calculationType)}});
+                Ext.define("PieCalculator",{extend:"Calculator",seriesType:"pie"});
+                Ext.define("PieChart",{xtype:"piechart",extend:"Rally.ui.chart.Chart",requires:["PieCalculator"],config:{chartConfig:{chart:{type:"pie",plotBackgroundColor:null,plotBorderWidth:null,plotShadow:!1},subtitle:{text:"Total Defects: {total}"},tooltip:{headerFormat:"",pointFormat:"<b>{point.name}:</b> {point.percentage:.1f}% ({point.y}/{point.total})"},plotOptions:{pie:{allowPointSelect:!0,cursor:"pointer",dataLabels:{enabled:!0,format:"<b>{point.name}:</b> {point.percentage:.1f}% ({point.y}/{point.total})",style:{color:"black"}}}}},calculatorType:"PieCalculator"},constructor:function(t){t=t||{},this.mergeConfig(t),this.callParent([this.config])}});
+                Ext.define("CustomChartApp",{extend:"Rally.app.App",componentCls:"app",layout:"fit",config:{defaultSettings:{types:"Defect",chartType:"piechart",aggregationField:"State",aggregationType:"count"}},launch:function(){Rally.data.wsapi.ModelFactory.getModels({types:"Defect"}).then({success:this._onModelsLoaded,scope:this})},_onModelsLoaded:function(t){this.models=_.values(t),this._addChart()},_addChart:function(){var t=this.getContext(),e=_.pluck(this.models,"typePath"),a={xtype:"rallygridboard",toggleState:"chart",chartConfig:this._getChartConfig(),context:t,modelNames:e};this.add(a)},_getChartConfig:function(){var t=this.getSetting("chartType"),e={xtype:t,chartColors:["#FF8200","#F6A900","#FAD200","#8DC63F","#1E7C00","#337EC6","#005EB8","#7832A5","#DA1884","#C0C0C0"],storeConfig:{context:this.getContext().getDataContext(),limit:1/0,fetch:this._getChartFetch(),sorters:this._getChartSort(),pageSize:2e3},calculatorConfig:{calculationType:this.getSetting("aggregationType"),field:this.getSetting("aggregationField"),bucketBy:"piechart"===t?null:this.getSetting("bucketBy")},chartConfig:{title:{text:this.context.getProject().Name}}};return e.storeConfig.models="Defect",e.storeType="Rally.data.wsapi.artifact.Store",e},_getChartFetch:function(){return["FormattedID","Name",this.getSetting("aggregationField")]},_getChartSort:function(){var t=this.models[0].getField(this.getSetting("aggregationField")),e=[];return t&&"collection"!==t.getType()&&t.sortable&&e.push({property:this.getSetting("aggregationField"),direction:"ASC"}),e}});
+
+            Rally.launchApp('CustomChartApp', {
+                name:"Configurable Defect Chart",
+                parentRepos:"",
+                version:"1.2.8"
+            });
+
+        });
+    </script>
+
+
+    <style type="text/css">
+        
+    </style>
+</head>
+<body>
+</body>
+</html>
