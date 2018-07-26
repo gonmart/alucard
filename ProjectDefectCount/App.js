@@ -6,15 +6,16 @@ Ext.define('CustomApp', {
     accountStore: undefined,
     pubStore: undefined,
     techOpsStore: undefined,
-    all: -1,
     global: -1,
     shop: -1,
     account: -1,
     pub: -1,
     tech: -1,
+    all: undefined,
     countStore: undefined,
     pieChart: undefined,
     context: {projectScopeDown: true},
+    totalDialog: undefined,
 
     launch: function () {
         let me = this;
@@ -121,19 +122,16 @@ Ext.define('CustomApp', {
             fetch: ['Project'],
             listeners: {
                 load: function () {
-                    me.techOps = me.techOpsStore.count();
+                    me.tech = me.techOpsStore.count();
                     console.log('techOpsStore Loaded', me.techOpsStore.count());
-                    me._createCountStore();
+                    //me.countStore2.load();
+                    me._getPie();
                 },
                 scope: me
             },
         });
-        me.globalStore.load();
-    },
-    
-    _createCountStore: function() {
-        let me= this;
-        Ext.define('DefectsCounter', {
+
+        /*Ext.define('DefectsCounter', {
             extend: 'Ext.data.Model',
             fields: ['name', 'count']
         });
@@ -156,54 +154,158 @@ Ext.define('CustomApp', {
                     'name': 'TechOps', 'count': me.techOps
                 },
             ],
-        });
-        console.log('CountStore: ', me.countStore2);
-        me._getPie();
+        });*/
+
+        me.globalStore.load();
     },
+
+
 //!**********************************************************************************\\
 //!*     Creates a basic chart and loads the count of defects based on store        *\\
 //!**********************************************************************************\\
     _getPie: function () {
         let me = this;
 
-        me.pieChart = Ext.create('Ext.chart.Chart', {
-            renderTo: Ext.getBody(),
-            width: 500,
-            height: 400,
-            animate: true,
-            store: me.countStore2,
-            theme: 'Base:gradients',
-            series: [{
-                type: 'pie',
-                angleField: 'count',
-                showInLegend: true,
-                tips: {
-                    trackMouse: true,
-                    width: 140,
-                    height: 28,
-                    renderer: function(storeItem, item) {
-                        // calculate and display percentage on hover
-                        var total = 0;
-                        me.countStore2.each(function(rec) {
-                            me.all = total += rec.get('count');
-                        });
-                        this.setTitle(storeItem.get('name') + ': ' + Math.round(storeItem.get('count') / total * 100) + '%');
+        me.pieChart = Ext.create('Rally.ui.chart.Chart', {
+            chartConfig: {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
+                },
+                title: {
+                    text: 'Defects By Project (Not Closed)',
+                    style: {
+                        fontWeight: 'bold',
+                        fontSize: '16',
+                    },
+                },
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        depth: 35,
+                        dataLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold',
+                                fontSize: '12',
+                                color: 'black'
+                            },
+                            format: '<b>{point.name}</b>: {point.y}'
+                        },
+                        colors: ['#f66db3', '#e62689', '#a10053', '#078A14', '#E8200D'],
+                        //showInLegend: true
                     }
                 },
-                highlight: {
-                    segment: {
-                        margin: 20
-                    }
-                },
-                label: {
-                    field: 'name',
-                    display: 'rotate',
-                    contrast: true,
-                    font: '18px Arial'
-                }
-            }]
+                series: [{
+                    name: 'Defects Count',
+                    colorByPoint: true,
+                    data: [
+                        ['Global', me.global],
+                        ['Shop', me.shop],
+                        ['AcctMngnt', me.account],
+                        ['PUB', me.pub],
+                        ['TechOps', me.tech],
+                    ]
+                }]
+            },
+            chartData: {
+                series: [{
+                    name: 'Defects Count',
+                    colorByPoint: true,
+                    data: [
+                        ['Global', me.global],
+                        ['Shop', me.shop],
+                        ['AcctMngnt', me.account],
+                        ['PUB', me.pub],
+                        ['TechOps', me.tech],
+                    ]
+                }]
+            },
         });
+        console.log(me.pieChart.chartData);
         me.add(me.pieChart);
+        me.all =  me.global + me.pub + me.account + me.shop + me.tech;
+        //me._createDialog();
     },
+
+    /*_createDialog: function () {
+        let me = this;
+        let number = me.all;
+        me.totalDialog = Ext.create('Rally.ui.dialog.Dialog', {
+            autoShow: true,
+            draggable: true,
+            width: 150,
+            height: 100,
+            title: 'Total Defects',
+            renderTo: Ext.getBody(),
+            style: {
+                borderColor:'#000000',
+                borderStyle:'solid',
+                borderWidth:'3px',
+                backgroundColor: '(245, 245,220,.5)',
+               // borderRadius: '100px',
+                padding: '10px',
+                paddingTop: '40px',
+                fontSize: '8px',
+                fontAlign: 'center',
+                color: '#fce0ee',
+                //marginLeft: '25%',
+                //marginBottom: '1px'
+            },
+            items: [{
+                xtype: 'text',
+                text: number,
+                degrees: 0,
+                style: {
+                    fontSize: '18px',
+                }
+            }],
+        });
+        me.add(me.totalDialog);
+    }*/
 });
+
+let a = [
+    '#fce0ee',
+    '#f6b3d5',
+    '#f66db3',
+    '#eb4d9e',
+    '#e62689',
+    '#e20074',
+    '#df006c',
+    '#ba0060',
+    '#d60057',
+    '#a10053'
+];
+let b = [
+    '#E3B721',
+    '#E3B721',
+    '#51D85E',
+    '#078A14',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D'
+];
+
+let c = [
+    '#ffffff',
+    '#f2f2f2',
+    '#e8e8e8',
+    '#cccccc',
+    '#9b9b9b',
+    '#6A6A6A',
+    '#4c4c4c',
+    '#333333',
+    '#262626',
+    '#000000'
+];
 

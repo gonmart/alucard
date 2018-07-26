@@ -10,226 +10,295 @@
                 Ext.define('CustomApp', {
     extend: 'Rally.app.App',
     componentCls: 'app',
-
-    myStore: undefined,
-    myGrid: undefined,
+    globalStore: undefined,
+    shopStore: undefined,
+    accountStore: undefined,
+    pubStore: undefined,
+    techOpsStore: undefined,
+    all: -1,
+    global: -1,
+    shop: -1,
+    account: -1,
+    pub: -1,
+    tech: -1,
+    countStore: undefined,
+    pieChart: undefined,
     context: {projectScopeDown: true},
-    //App starts here
+    totalDialog: undefined,
+
     launch: function () {
         let me = this;
-        //Creates horizontal layout dropdown menus
-        let pulldownContainer = Ext.create('Ext.container.Container', {
-            itemId: 'pulldown-container',
-            layout: {
-                type: 'hbox',
-                align: 'stretch'
-            }
-        });
-
-        me.add(pulldownContainer);
-        me._loadProjects();
-        me._loadFields();
-        me._loadData();
+        me._loadStores();
     },
 
-
-    _loadProjects: function () {
+    _loadStores: function () {
         let me = this;
-        // creates data store containing the list of projects & Ids
-        let projectList = Ext.create('Ext.data.Store', {
-            fields: ['name', 'value'],
-            data: [
-                {"name": "All", "value": "208447136196"},
-                {"name": "Global", "value": "208449426736"},
-                {"name": "Shop", "value": "208450167952"},
-                {"name": "Account Management", "value": "208449406576"},
-                {"name": "PUB", "value": "208449434348"},
-                {"name": "TechOps", "value": "222502039964"},
-            ]
+        let myFilter = Ext.create('Rally.data.wsapi.Filter', {
+            property: 'State',
+            operator: '<=',
+            value: 'Resolved'
         });
-
-        // create the custom combo box, attached to the projects data store
-        let projectComboBox = Ext.create('Ext.form.ComboBox', {
-            itemId: 'project-combobox',
-            fieldLabel: 'Defects by Capability',
-            labelAlign: 'right',
-            store: projectList,
-            queryMode: 'local',
-            displayField: 'name',
-            valueField: 'value',
-            value: '208447136196',
-            width: 300,
-            listeners: {
-                ready: me._loadData,
-                select: me._loadData,
-                scope: me
-            }
-        });
-        me.down('#pulldown-container').add(projectComboBox);
-    },
-
-    _loadFields: function () {
-        let me = this;
-        // creates data store containing the list of projects & Ids
-        let fieldList = Ext.create('Ext.data.Store', {
-            fields: ['name', 'value'],
-            data: [
-                {"name": "State", "value": "State"},
-                {"name": "Severity", "value": "Severity"},
-                {"name": "Priority", "value": "Priority"},
-                {"name": "Environment", "value": "Environment"},
-                {"name": "Trend", "value": "Trend"},
-            ]
-        });
-
-        // create the custom combo box, attached to the projects data store
-        let fieldComboBox = Ext.create('Ext.form.ComboBox', {
-            itemId: 'field-combobox',
-            fieldLabel: 'Defect Fields',
-            labelAlign: 'right',
-            store: fieldList,
-            queryMode: 'local',
-            displayField: 'name',
-            valueField: 'value',
-            width: 300,
-            renderTo: Ext.getBody(),
-            listeners: {
-                select: me._loadProperties,
-                scope: me
-            }
-        });
-        me.add(fieldComboBox);
-    },
-
-    _loadProperties: function () {
-        let me = this;
-        let selectedField = this.down('#field-combobox').getValue();
-
-        let propertyCombobox = Ext.create('Rally.ui.combobox.FieldValueComboBox', {
-            itemId: 'property-combobox',
+        me.globalStore = Ext.create('Rally.data.wsapi.Store', {
+            itemId: 'all-store',
             model: 'Defect',
-            field: selectedField,
-            fieldLabel: 'Defects by Property',
-            labelAlign: 'right',
-            width: 300,
-            renderTo: Ext.getBody(),
+            limit: 'Infinity',
+            filters: myFilter,
+            context: {
+                project: '/project/' + '208449426736',
+                projectScopeDown: true,
+                projectScopeUp: false
+            },
+            fetch: ['Project'],
             listeners: {
-                select: me._loadData,
+                load: function () {
+                    me.global = me.globalStore.count();
+                    me.shopStore.load();
+                    console.log('globalStore Loaded', me.globalStore.count());
+                },
                 scope: me
-            }
+            },
+        });
+        me.shopStore = Ext.create('Rally.data.wsapi.Store', {
+            itemId: 'all-store',
+            model: 'Defect',
+            limit: 'Infinity',
+            filters: myFilter,
+            context: {
+                project: '/project/' + '208450167952',
+                projectScopeDown: true,
+                projectScopeUp: false
+            },
+            fetch: ['Project'],
+            listeners: {
+                load: function () {
+                    me.shop = me.shopStore.count();
+                    me.accountStore.load();
+                    console.log('shopStore Loaded', me.shopStore.count());
+                },
+                scope: me
+            },
+        });
+        me.accountStore = Ext.create('Rally.data.wsapi.Store', {
+            itemId: 'all-store',
+            model: 'Defect',
+            limit: 'Infinity',
+            filters: myFilter,
+            context: {
+                project: '/project/' + '208449406576',
+                projectScopeDown: true,
+                projectScopeUp: false
+            },
+            fetch: ['Project'],
+            listeners: {
+                load: function () {
+                    me.account = me.accountStore.count();
+                    me.pubStore.load();
+                    console.log('accountStore Loaded', me.accountStore.count());
+                },
+                scope: me
+            },
+        });
+        me.pubStore = Ext.create('Rally.data.wsapi.Store', {
+            itemId: 'all-store',
+            model: 'Defect',
+            limit: 'Infinity',
+            filters: myFilter,
+            context: {
+                project: '/project/' + '208449434348',
+                projectScopeDown: true,
+                projectScopeUp: false
+            },
+            fetch: ['Project'],
+            listeners: {
+                load: function () {
+                    me.pub = me.pubStore.count();
+                    me.techOpsStore.load();
+                    console.log('pubStore Loaded', me.pubStore.count());
+                },
+                scope: me
+            },
+        });
+        me.techOpsStore = Ext.create('Rally.data.wsapi.Store', {
+            itemId: 'all-store',
+            model: 'Defect',
+            limit: 'Infinity',
+            filters: myFilter,
+            context: {
+                project: '/project/' + '222502039964',
+                projectScopeDown: true,
+                projectScopeUp: false
+            },
+            fetch: ['Project'],
+            listeners: {
+                load: function () {
+                    me.techOps = me.techOpsStore.count();
+                    console.log('techOpsStore Loaded', me.techOpsStore.count());
+                    //me.countStore2.load();
+                    me._getPie();
+                },
+                scope: me
+            },
         });
 
-        me.down('#pulldown-container').add(propertyCombobox);
+        /*Ext.define('DefectsCounter', {
+            extend: 'Ext.data.Model',
+            fields: ['name', 'count']
+        });
+        me.countStore2 = Ext.create('Ext.data.Store', {
+            model: 'DefectsCounter',
+            data: [
+                {
+                    'name': 'Global', 'count': me.global
+                },
+                {
+                    'name': 'Shop', 'count': me.shop
+                },
+                {
+                    'name': 'AcctMngnt', 'count': me.account
+                },
+                {
+                    'name': 'PUB', 'count': me.pub
+                },
+                {
+                    'name': 'TechOps', 'count': me.techOps
+                },
+            ],
+        });*/
+
+        me.globalStore.load();
     },
 
 
-    _loadData: function () {
+//!**********************************************************************************\\
+//!*     Creates a basic chart and loads the count of defects based on store        *\\
+//!**********************************************************************************\\
+    _getPie: function () {
         let me = this;
-        console.log('Called LoadData');
-        let selectedProject;
-        if (me.down('#project-combobox').getValue()){
-            selectedProject = me.down('#project-combobox').getValue();
-        }
-        else selectedProject = 'All';
-        //Sets filters for data that limit to user selection
-        //If the store exists, load new data
-        if (me.alucardStore) {
-            console.log('store already exists');
-            console.log('is ready', me._isReady());
-            me.alucardStore.context.project = me._getProjectContext(selectedProject);
-            if(me._isReady()) {
-                console.log('selections are ready');
-                me.alucardStore.setFilter(me._loadSelections());
-            }
 
-            this.alucardStore.load();
-            }
-
-
-        //Else Create a fresh grid/store of data
-        else {
-            me.alucardStore = Ext.create('Rally.data.wsapi.Store', {
-                model: 'Defect',
-                autoLoad: true,
-                context: {
-                    project: me._getProjectContext(selectedProject),
-                    projectScopeDown: true,
-                    projectScopeUp: false
+        me.pieChart = Ext.create('Rally.ui.chart.Chart', {
+            chartConfig: {
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false,
+                    type: 'pie'
                 },
-                listeners: {
-                    load: function (alucardStore) {
-                        if (!this.alucardGrid) {
-                            me._createGrid(alucardStore);
-                        }
+                title: {
+                    text: 'Defects By Project',
+                    style: {
+                        fontWeight: 'bold',
+                        fontSize: '16',
                     },
-                    scope: me
                 },
-                fetch: ['FormattedID', 'Name', 'Severity', 'Iteration', 'Project']
-            });
-        }
-    },
-
-    _isReady() {
-        let me = this;
-        let ready =false;
-        if(this.down('#field-combobox').getValue() && me.down('#property-combobox').getValue()) {
-            ready = true;
-        }
-        return ready;
-    },
-
-    _loadSelections() {
-        let me = this;
-        let selectedField;
-        let selectedProperty;
-        if(me._isReady()) {
-            selectedField = this.down('#field-combobox').getValue();
-            selectedProperty = this.down('#property-combobox').getValue();
-        }
-        let propertyFilter = me._getFilters(selectedField, selectedProperty);
-        return propertyFilter
-
-    },
-
-    _getFilters: function(field, property) {
-        myfilter = Ext.create('Rally.data.wsapi.Filter', {
-            property: field,
-            operator: '=',
-            value: property
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        depth: 35,
+                        dataLabels: {
+                            enabled: true,
+                            style: {
+                                fontWeight: 'bold',
+                                fontSize: '12',
+                                color: 'black'
+                            },
+                            format: '<b>{point.name}</b>: {point.y}'
+                        },
+                        colors: ['#f66db3', '#e62689', '#a10053', '#078A14', '#E8200D'],
+                        //showInLegend: true
+                    }
+                },
+                series: [{
+                    name: 'Defects Count',
+                    colorByPoint: true,
+                    data: [
+                        ['Global', me.global],
+                        ['Shop', me.shop],
+                        ['AcctMngnt', me.account],
+                        ['PUB', me.pub],
+                        ['TechOps', me.techOps],
+                    ]
+                }]
+            },
+            chartData: {
+                series: [{
+                    name: 'Defects Count',
+                    colorByPoint: true,
+                    data: [
+                        ['Global', me.global],
+                        ['Shop', me.shop],
+                        ['AcctMngnt', me.account],
+                        ['PUB', me.pub],
+                        ['TechOps', me.techOps],
+                    ]
+                }]
+            },
+            categories: null
         });
-        return myfilter;
+        console.log(me.pieChart.chartData);
+        me.add(me.pieChart);
+        me._createDialog();
     },
 
-    //Creates a new grid with specified columns
-    _createGrid: function (alucardStore) {
-        this.alucardGrid = Ext.create('Rally.ui.grid.Grid', {
-            store: alucardStore,
-            columnCfgs: [
-                'FormattedID', 'Name', 'Severity', 'Iteration', 'Project'
-            ]
+    _createDialog: function () {
+        let me = this;
+        let number = me.all;
+        me.totalDialog =  Ext.create('Rally.ui.dialog.RichTextDialog', {
+            autoShow: true,
+            title: 'Total Defects',
+            record: number,
         });
-        this.add(this.alucardGrid);
-    },
-
-    _getProjectContext: function (userSelection) {
-        let myProject = '/project/' + userSelection;
-        let defaultProject = '/project/208447136196';
-        if (!userSelection) {
-            myProject = defaultProject;
-        }
-
-        return myProject;
-    },
+        me.add(me.totalDialog);
+    }
 });
 
+let a = [
+    '#fce0ee',
+    '#f6b3d5',
+    '#f66db3',
+    '#eb4d9e',
+    '#e62689',
+    '#e20074',
+    '#df006c',
+    '#ba0060',
+    '#d60057',
+    '#a10053'
+];
+let b = [
+    '#E3B721',
+    '#E3B721',
+    '#51D85E',
+    '#078A14',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D',
+    '#E8200D'
+];
 
+let c = [
+    '#ffffff',
+    '#f2f2f2',
+    '#e8e8e8',
+    '#cccccc',
+    '#9b9b9b',
+    '#6A6A6A',
+    '#4c4c4c',
+    '#333333',
+    '#262626',
+    '#000000'
+];
 
 
 
             Rally.launchApp('CustomApp', {
                 name:"BasicRallyGrid",
                 parentRepos:"",
-                version:"0.1.1"
+                version:"1.2.8"
             });
 
         });
