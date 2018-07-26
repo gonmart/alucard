@@ -31,8 +31,11 @@ Ext.define('PieChart', {
                         style: {
                             color: 'black'
                         }
-                    }
-                }
+                    },
+                    startAngle: -90,
+                    endAngle: 90,
+                    center: ['50%', '75%']
+                },
             }
         },
         calculatorType: 'PieCalculator'
