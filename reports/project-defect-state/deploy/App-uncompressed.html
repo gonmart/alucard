@@ -233,8 +233,11 @@
                 plotBorderWidth: null,
                 plotShadow: false
             },
-            subtitle: {text: 'Total Defects: {total}'},
-            tooltip: {
+            subtitle: {
+                useHTML: true,
+                text: 'Total Defects: {point.total}'
+            },
+            tooltip: { // what shows up on mouseover
                 headerFormat: '',
                 pointFormat: '<b>{point.name}:</b> {point.percentage:.1f}% ({point.y}/{point.total})'
             },
@@ -244,12 +247,15 @@
                     cursor: 'pointer',
                     dataLabels: {
                         enabled: true,
-                        format: '<b>{point.name}:</b> {point.percentage:.1f}% ({point.y}/{point.total})',
+                        format: '<b>{point.name}:</b> {point.y}',
                         style: {
                             color: 'black'
                         }
-                    }
-                }
+                    },
+                    startAngle: -90,
+                    endAngle: 90,
+                    center: ['50%', '75%']
+                },
             }
         },
         calculatorType: 'PieCalculator'
@@ -270,11 +276,15 @@
     layout: 'fit',
 
     config: {
+        // Edit these fields for easy config
         defaultSettings: {
             types: 'Defect',
             chartType: 'piechart',
             aggregationField: 'State',
-            aggregationType: 'count'
+            aggregationType: 'count', 
+            context: {
+                project: "/project/208449406576"
+            }
         }
     },
 
@@ -304,6 +314,9 @@
                 
                 context: context,
                 modelNames: modelNames,
+                storeConfig: {
+                    filters: this._getFilters()
+                }
             };
 
         // initializes Chart.js
@@ -311,7 +324,7 @@
     },
 
     _getChartConfig: function() {
-        var chartType = this.getSetting('chartType'), // always piechart
+        var chartType = this.getSetting('chartType'),
             config = {
                 xtype: chartType,
                 chartColors: [
@@ -338,6 +351,7 @@
                     field: this.getSetting('aggregationField'),
                     bucketBy: chartType === 'piechart' ? null : this.getSetting('bucketBy')
                 },
+                // TODO: Fix this to work with defaultSettings
                 chartConfig: {
                     title: {text: this.context.getProject().Name}
                 }
@@ -350,12 +364,31 @@
         return config;
     },
 
+    // construct filters for projects given project name
+    _getFilters: function (projectId) {
+        var projectFilter = Ext.create("Rally.data.wsapi.Filter", {
+            property: "Project",
+            operator: "=",
+            value: this.config.defaultSettings.context.project
+        });
+
+        // filters for defects in child and child-child projects
+        var scopeFilter = Ext.create("Rally.data.wsapi.Filter", {
+            property: "Project.Parent",
+            operator: "=",
+            value: this.config.defaultSettings.context.project
+        }).or(Ext.create("Rally.data.wsapi.Filter", {
+            property: "Project.Parent.Parent",
+            operator: "=",
+            value: this.config.defaultSettings.context.project
+            })
+        );
+        return projectFilter.or(scopeFilter);
+    },
+
     // Returns an array for organizing data with FormattedID, Name, and custom field
     _getChartFetch: function() {
-        var field = this.getSetting('aggregationField'),
-            fetch = ['FormattedID', 'Name', field];
-
-        return fetch;
+        return ['FormattedID', 'Name', this.getSetting('aggregationField')];
     },
 
     // Defined to sort chart fields in ascending order for consistency

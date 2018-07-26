@@ -4,11 +4,15 @@ Ext.define('CustomChartApp', {
     layout: 'fit',
 
     config: {
+        // Edit these fields for easy config
         defaultSettings: {
             types: 'Defect',
             chartType: 'piechart',
             aggregationField: 'State',
-            aggregationType: 'count'
+            aggregationType: 'count', 
+            context: {
+                project: "/project/208449406576"
+            }
         }
     },
 
@@ -38,6 +42,9 @@ Ext.define('CustomChartApp', {
                 
                 context: context,
                 modelNames: modelNames,
+                storeConfig: {
+                    filters: this._getFilters()
+                }
             };
 
         // initializes Chart.js
@@ -45,7 +52,7 @@ Ext.define('CustomChartApp', {
     },
 
     _getChartConfig: function() {
-        var chartType = this.getSetting('chartType'), // always piechart
+        var chartType = this.getSetting('chartType'),
             config = {
                 xtype: chartType,
                 chartColors: [
@@ -72,6 +79,7 @@ Ext.define('CustomChartApp', {
                     field: this.getSetting('aggregationField'),
                     bucketBy: chartType === 'piechart' ? null : this.getSetting('bucketBy')
                 },
+                // TODO: Fix this to work with defaultSettings
                 chartConfig: {
                     title: {text: this.context.getProject().Name}
                 }
@@ -82,6 +90,28 @@ Ext.define('CustomChartApp', {
         config.storeType = 'Rally.data.wsapi.artifact.Store';
         
         return config;
+    },
+
+    // construct filters using project from default settings
+    _getFilters: function () {
+        var projectFilter = Ext.create("Rally.data.wsapi.Filter", {
+            property: "Project",
+            operator: "=",
+            value: this.config.defaultSettings.context.project
+        });
+
+        // filters for defects in child and child-child projects
+        var scopeFilter = Ext.create("Rally.data.wsapi.Filter", {
+            property: "Project.Parent",
+            operator: "=",
+            value: this.config.defaultSettings.context.project
+        }).or(Ext.create("Rally.data.wsapi.Filter", {
+            property: "Project.Parent.Parent",
+            operator: "=",
+            value: this.config.defaultSettings.context.project
+            })
+        );
+        return projectFilter.or(scopeFilter);
     },
 
     // Returns an array for organizing data with FormattedID, Name, and custom field
@@ -100,7 +130,6 @@ Ext.define('CustomChartApp', {
                 property: this.getSetting('aggregationField'),
                 direction: 'ASC'
             });
-            console.log('getChartSort particular condition accessed', sorters);
         }
         return sorters;
     },
