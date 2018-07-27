@@ -1,20 +1,13 @@
 # Ignore login credentials
-**/deploy.json
+deploy.json
 # Ignore debug build version of App
-**/App-debug.html
+App-debug.html
 # Ignore 'local' build version of App
-**/App-local.html
+App-local.html
 #IDE Files
 .idea
-.vs
-<<<<<<< HEAD
 .c9revisions
 node_modules
 #test files
 _SpecRunner.html
 .grunt
-
-**/deploy/
-=======
-reports/CustomChart/
->>>>>>> 856db40d6f02c7bdd3b6e912f59c42e98aa80dc0
