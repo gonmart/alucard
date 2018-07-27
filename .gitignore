@@ -7,7 +7,6 @@
 #IDE Files
 .idea
 .vs
-<<<<<<< HEAD
 .c9revisions
 node_modules
 #test files
@@ -15,6 +14,4 @@ _SpecRunner.html
 .grunt
 
 **/deploy/
-=======
 reports/CustomChart/
->>>>>>> 856db40d6f02c7bdd3b6e912f59c42e98aa80dc0
