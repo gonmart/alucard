@@ -10,10 +10,14 @@ Ext.define('CustomChartApp', {
             chartType: 'piechart',
             aggregationField: 'State',
             aggregationType: 'count', 
+
+            // This value is passed to data store filter, not storeconfig
             context: {
-                project: "/project/208449406576"
-            }
-        }
+                project: "208449406576" // account management
+            },
+            
+            title: "Account Management"
+        },
     },
 
     launch: function() {
@@ -42,9 +46,6 @@ Ext.define('CustomChartApp', {
                 
                 context: context,
                 modelNames: modelNames,
-                storeConfig: {
-                    filters: this._getFilters()
-                }
             };
 
         // initializes Chart.js
@@ -68,7 +69,9 @@ Ext.define('CustomChartApp', {
                 "#C0C0C0" // $grey4
                 ],
                 storeConfig: {
-                    context: this.getContext().getDataContext(),
+                    context: {
+                        project: '/project/' + this.config.defaultSettings.context.project
+                    },
                     limit: Infinity,
                     fetch: this._getChartFetch(),
                     sorters: this._getChartSort(),
@@ -79,39 +82,19 @@ Ext.define('CustomChartApp', {
                     field: this.getSetting('aggregationField'),
                     bucketBy: chartType === 'piechart' ? null : this.getSetting('bucketBy')
                 },
-                // TODO: Fix this to work with defaultSettings
                 chartConfig: {
-                    title: {text: this.context.getProject().Name}
+                    title: {
+                        text: '<h2>' + this.config.defaultSettings.title + '<h2>',
+                        useHTML: true
+                    },
                 }
             };
 
         // This app only works with Defect model type
         config.storeConfig.models = 'Defect';
         config.storeType = 'Rally.data.wsapi.artifact.Store';
-        
+
         return config;
-    },
-
-    // construct filters using project from default settings
-    _getFilters: function () {
-        var projectFilter = Ext.create("Rally.data.wsapi.Filter", {
-            property: "Project",
-            operator: "=",
-            value: this.config.defaultSettings.context.project
-        });
-
-        // filters for defects in child and child-child projects
-        var scopeFilter = Ext.create("Rally.data.wsapi.Filter", {
-            property: "Project.Parent",
-            operator: "=",
-            value: this.config.defaultSettings.context.project
-        }).or(Ext.create("Rally.data.wsapi.Filter", {
-            property: "Project.Parent.Parent",
-            operator: "=",
-            value: this.config.defaultSettings.context.project
-            })
-        );
-        return projectFilter.or(scopeFilter);
     },
 
     // Returns an array for organizing data with FormattedID, Name, and custom field
@@ -133,5 +116,4 @@ Ext.define('CustomChartApp', {
         }
         return sorters;
     },
-
 });
