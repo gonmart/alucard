@@ -172,7 +172,13 @@ Ext.define('CustomApp', {
                     plotBackgroundColor: null,
                     plotBorderWidth: null,
                     plotShadow: false,
-                    type: 'pie'
+                    type: 'pie',
+                    events: {
+                        load: function() {
+                            let total = this.series[0].data[0].total;
+                            this.setSubTitle(total);
+                        }
+                    }
                 },
                 title: {
                     text: 'Defects By Project (Not Closed)',

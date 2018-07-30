@@ -716,6 +716,7 @@
         }
     },
 
+    // Returns settings fields from top-level Rally app settings
     getSettingsFields: function() {
        return Settings.getSettingsFields(this.getContext());
     },
@@ -730,6 +731,7 @@
       return shouldLoadAllowedValues;
     },
 
+    // Assert model type for this app
     _onModelsLoaded: function(models) {
         this.models = _.values(models);
         var model = this.models[0],
@@ -751,6 +753,7 @@
         console.log('this.models', this.models);
     },
 
+    // Add chart to this app
     _addChart: function() {
         var context = this.getContext(),
             whiteListFields = ['Milestones', 'Tags'],
@@ -760,6 +763,7 @@
                 toggleState: 'chart',
                 chartConfig: this._getChartConfig(),
                 plugins: [{
+                    // Built-in filter control for app user
                     ptype:'rallygridboardinlinefiltercontrol',
                     showInChartMode: true,
                     inlineFilterButtonConfig: {
@@ -784,7 +788,7 @@
                         }
                     }
                 },
-                {
+                { // Built-in option button to export to csv
                     ptype: 'rallygridboardactionsmenu',
                     menuItems: [{
                         text: 'Export to CSV...',
@@ -812,6 +816,7 @@
         this.add(gridBoardConfig);
     },
 
+    // Rally App filter header for commonly requested filters for the user
     _getQuickFilters: function() {
         var quickFilters = ['Owner', 'State', 'ScheduleState'],
             model = this.models[0];
@@ -898,6 +903,7 @@
         this._addChart();
     },
 
+    // Returns an array of labels and field(s) for organizing data
     _getChartFetch: function() {
         var field = this.getSetting('aggregationField'),
             aggregationType = this.getSetting('aggregationType'),
@@ -921,6 +927,7 @@
         return fetch;
     },
 
+    // Defined to sort chart fields in ascending order
     _getChartSort: function() {
         var model = this.models[0],
             field = model.getField(this.getSetting('aggregationField')),

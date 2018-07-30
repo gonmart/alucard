@@ -86,7 +86,7 @@ Ext.define('CustomApp', {
                 load: function (store, data, success) {
                     me.add(myStore);
                     console.log('Store Loaded!...', myStore);
-                    if(configs.hasGrid) {
+                    if (configs.hasGrid) {
                         me._setGrid(configs, myStore);
                     }
                     else me._setChart(configs);
@@ -144,15 +144,103 @@ Ext.define('CustomApp', {
         me._setChart(configs, store);
     },
 
-    _setChart: function(configs, store) {
+    _setChart: function (configs, store) {
         let me = this;
 
         let myChart = me._constructChart(configs, store);
 
-        console.log(myChart);
+        console.log('MyChart:', myChart);
+        me.add(myChart);
     },
 
-    _constructChart: function (configs,store) {
-        return 'How cool!';
+    _constructChart: function (configs, store) {
+        let me = this;
+
+        let chart = 'Chart is not defined';
+        switch (configs.chartType) {
+            case 'Pie':
+                console.log('Piechart Constructor was called!');
+                chart = me._pieChart(configs, store);
+                break;
+            case 'Bar':
+                console.log('_barChart Constructor was called!');
+                chart = me._barChart(configs, store);
+                break;
+            case 'Column':
+                console.log('_columnChart Constructor was called!');
+                chart = me._columnChart(configs, store);
+                break;
+            default:
+                console.log('Valid chart  not specified...');
+                return chart;
+        }
+    },
+    _pieChart: function (configs, store,) {
+        let me = this;
+        let pieChart = Ext.define('PieChart', {
+            xtype: 'piechart',
+            extend: 'Rally.ui.chart.Chart',
+            config: {
+                chartConfig: {
+                    chart: {
+                        type: 'pie',
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false
+                    },
+                    title: {text: ''},
+                    tooltip: {
+                        headerFormat: '',
+                        pointFormat: '<b>{point.name}:</b> {point.percentage:.1f}% ({point.y}/{point.total})'
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            dataLabels: {
+                                enabled: true,
+                                format: '<b>{point.name}:</b> {point.percentage:.1f}% ({point.y}/{point.total})',
+                                style: {
+                                    color: 'black'
+                                }
+                            }
+                        }
+                    }
+                },
+                calculatorType: 'My.BurnUpCalculator',
+                calculatorConfig: {}
+            },
+        });
+        return pieChart;
+    },
+
+    _barChart: function (configs, store) {
+    },
+
+    _columnChart: function (configs, store) {
+    }
+
+});
+
+Ext.define('My.BurnUpCalculator', {
+    extend: 'Rally.data.lookback.calculator.TimeSeriesCalculator',
+
+    getMetrics: function () {
+        return [
+            {
+                field: 'PlanEstimate',     //sum plan estimate
+                as: 'Planned',             //create a line series
+                display: 'line',
+                f: 'sum'
+            },
+            {
+                field: 'PlanEstimate',    //sum completed plan estimate
+                as: 'Completed',          //create a column series
+                f: 'filteredSum',
+                filterField: 'ScheduleState',
+                filterValues: ['Accepted', 'Released'],
+                display: 'column'
+            }
+        ];
     }
 });
