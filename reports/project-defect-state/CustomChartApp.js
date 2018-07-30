@@ -5,18 +5,29 @@ Ext.define('CustomChartApp', {
 
     config: {
         // Edit these fields for easy config
+        // See README.md for more information
         defaultSettings: {
             types: 'Defect',
-            chartType: 'piechart',
-            aggregationField: 'State',
+            chartType: 'piechart', // Cannot be changed here without more app config
+            aggregationField: 'State', // State, 
             aggregationType: 'count', 
 
             // This value is passed to data store filter, not storeconfig
             context: {
-                project: "208449406576" // account management
+                project: "208447136196" // OneSite
+                // project: "208449406576" // Account Management
+                // project: "208449426736" // Global
+                // project: "208449434348" // PUB
+                // project: "208450167952" // Shop
+                // project: "222502039964" // TechOps
             },
             
-            title: "Account Management"
+            title: "OneSite"
+            // title: "Account Management"
+            // title: "Global"
+            // title: "PUB"
+            // title: "Shop"
+            // title: "TechOps"
         },
     },
 
