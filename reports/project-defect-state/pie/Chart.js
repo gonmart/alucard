@@ -56,7 +56,5 @@ Ext.define('PieChart', {
 
         // initilizes Calculator.js
         this.callParent([this.config]);
-
-        console.log('chart.js', this);
     }
 });
